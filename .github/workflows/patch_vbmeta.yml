@@ -12,7 +12,7 @@ on:
         - x86_64
         - x86
         - arm64-v8a
-        - armaebi-v7a
+        - armeabi-v7a
 
 permissions:
   contents: write
@@ -34,10 +34,27 @@ jobs:
       run: |
         file ${{ github.event.inputs.ARCHITECTURE }}/vbmeta-disable-verification
         
-    - name: Give Permissio and Run Patch
+    - name: Give Permission and Run Patch
       run: |
-        chmod +x ${{ github.event.inputs.ARCHITECTURE }}/vbmeta-disable-verification
-        ./${{ github.event.inputs.ARCHITECTURE }}/vbmeta-disable-verification vbmeta.img
+        ARCH="${{ github.event.inputs.ARCHITECTURE }}"
+        BIN="./${ARCH}/vbmeta-disable-verification"
+        chmod +x "$BIN"
+
+        case "$ARCH" in
+          x86_64)
+            "$BIN" vbmeta.img
+            ;;
+          x86|arm64-v8a|armeabi-v7a)
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq qemu-user-static
+            case "$ARCH" in
+              x86) QEMU=qemu-i386-static ;;
+              arm64-v8a) QEMU=qemu-aarch64-static ;;
+              armeabi-v7a) QEMU=qemu-arm-static ;;
+            esac
+            "$QEMU" "$BIN" vbmeta.img
+            ;;
+        esac
 
     - name: Upload to Release
       uses: ncipollo/release-action@v1.12.0

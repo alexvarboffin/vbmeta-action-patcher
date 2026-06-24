@@ -9,6 +9,5 @@ This github action will let you patch your vbmeta. Prebuilt files for patching a
 
 ## Notes
 * It is equivalent to: `fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img`.
-* If patching failed, maybe you are patching using wrong architecture;
-  * Check Operating System Information in the workflow results.
-  * If your Operating System Information tells you x86_64, then you need to use x86_64 as architecture.
+* **Architecture** selects which patcher binary to run on the GitHub runner, not your phone's CPU. GitHub Actions uses `x86_64` Linux — pick **x86_64** for the fastest run (recommended). Other architectures work via QEMU emulation.
+* If patching failed with `cannot execute binary file: Exec format error`, you chose a binary that does not match the runner; use **x86_64**.
